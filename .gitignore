@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .env
+
+# External repositories
+awesome-claude-agents/

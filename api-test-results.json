@@ -1,0 +1,80 @@
+{
+  "timestamp": "2025-07-29T19:58:44.519Z",
+  "tests": [
+    {
+      "name": "User Login",
+      "success": true,
+      "timestamp": "2025-07-29T19:58:44.601Z",
+      "note": "Using existing test user"
+    },
+    {
+      "name": "LLM: Basic LLM Query",
+      "success": true,
+      "timestamp": "2025-07-29T19:58:45.038Z",
+      "duration": 436,
+      "note": "Response format correct",
+      "response": "\"LLM_TEST_SUCCESS\"..."
+    },
+    {
+      "name": "LLM: JSON Schema Response",
+      "success": true,
+      "timestamp": "2025-07-29T19:58:45.687Z",
+      "duration": 648,
+      "note": "Response format correct",
+      "response": "{\"status\":\"success\",\"number\":42,\"valid\":true}..."
+    },
+    {
+      "name": "Thought Processing: Clear Task",
+      "success": false,
+      "timestamp": "2025-07-29T19:58:51.641Z",
+      "duration": 5954,
+      "note": "Expected todo, got undefined",
+      "category": "goal",
+      "requiresTriage": false
+    },
+    {
+      "name": "Thought Processing: Pure Emotion",
+      "success": false,
+      "timestamp": "2025-07-29T19:58:53.563Z",
+      "duration": 1922,
+      "note": "Expected thoughts, got undefined",
+      "category": "reflection",
+      "requiresTriage": false
+    },
+    {
+      "name": "Thought Processing: Ambiguous Thought",
+      "success": false,
+      "timestamp": "2025-07-29T19:58:56.653Z",
+      "duration": 3090,
+      "note": "Expected triage requirement but got auto-route",
+      "category": "reflection",
+      "requiresTriage": false
+    },
+    {
+      "name": "Whisper Service Reachability",
+      "success": true,
+      "timestamp": "2025-07-29T19:58:57.158Z",
+      "duration": 502,
+      "note": "Service reachable, expected error with dummy audio"
+    },
+    {
+      "name": "DALL-E Image Generation",
+      "success": false,
+      "timestamp": "2025-07-29T19:58:57.773Z",
+      "error": "HTTP 500: Failed to generate image"
+    },
+    {
+      "name": "Concurrent Request Handling",
+      "success": true,
+      "timestamp": "2025-07-29T19:58:58.279Z",
+      "duration": 505,
+      "note": "3 concurrent requests processed",
+      "averageTime": 168
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 4,
+    "total": 9
+  }
+}

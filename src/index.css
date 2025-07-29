@@ -154,5 +154,100 @@ button:focus-visible {
   }
   body {
     @apply bg-background text-foreground;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+    /* Improve font rendering on mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent zoom on input focus in iOS Safari */
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  /* Mobile-specific optimizations */
+  html {
+    /* Better scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent zoom on double tap */
+    touch-action: manipulation;
+  }
+}
+
+@layer utilities {
+  /* Safe area support for iOS */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .pb-safe {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  
+  /* Touch-friendly interactions */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Improved scrolling */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Better button press feedback */
+  .touch-feedback {
+    transition: transform 0.1s ease-out, background-color 0.15s ease-out;
+  }
+  
+  .touch-feedback:active {
+    transform: scale(0.98);
+  }
+  
+  /* Prevent text selection on UI elements */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Full viewport height that works with mobile browsers */
+  .min-h-screen-mobile {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Optimized focus styles for mobile */
+  .focus-mobile:focus {
+    outline: 2px solid rgb(59 130 246);
+    outline-offset: 2px;
+  }
+  
+  /* Hide scrollbars but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Better input styling for mobile */
+  .input-mobile {
+    font-size: 16px; /* Prevents zoom on iOS */
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0.75rem;
+  }
+  
+  /* PWA-specific styles */
+  .pwa-safe-area {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }

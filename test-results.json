@@ -1,0 +1,125 @@
+{
+  "timestamp": "2025-07-29T19:19:41.531Z",
+  "summary": {
+    "total": 19,
+    "passed": 16,
+    "failed": 2,
+    "warnings": 1
+  },
+  "results": [
+    {
+      "test": "Health Check",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:40.280Z",
+      "details": "Server is running"
+    },
+    {
+      "test": "User Registration",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:40.454Z",
+      "details": "User created with ID: 4"
+    },
+    {
+      "test": "User Login",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:40.614Z",
+      "details": "Login successful"
+    },
+    {
+      "test": "Invalid Login Rejection",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:40.776Z",
+      "details": "Correctly rejected invalid credentials"
+    },
+    {
+      "test": "Protected Route (No Auth)",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:40.879Z",
+      "details": "Correctly rejected unauthorized request"
+    },
+    {
+      "test": "Protected Route (With Auth)",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:40.882Z",
+      "details": "Authorized request accepted"
+    },
+    {
+      "test": "Create Thought",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:40.987Z",
+      "details": "Created thought with ID: 2"
+    },
+    {
+      "test": "Read Thoughts",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:40.989Z",
+      "details": "Retrieved 1 thoughts"
+    },
+    {
+      "test": "Update Thought",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:40.991Z",
+      "details": "Thought updated successfully"
+    },
+    {
+      "test": "Delete Thought",
+      "status": "FAIL",
+      "timestamp": "2025-07-29T19:19:40.993Z",
+      "details": "Status: 0"
+    },
+    {
+      "test": "Create Goal",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:41.099Z",
+      "details": "Created goal with ID: 4"
+    },
+    {
+      "test": "Read Goals",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:41.100Z",
+      "details": "Retrieved 1 goals"
+    },
+    {
+      "test": "Update Goal",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:41.102Z",
+      "details": "Goal updated successfully"
+    },
+    {
+      "test": "Delete Goal",
+      "status": "FAIL",
+      "timestamp": "2025-07-29T19:19:41.103Z",
+      "details": "Status: 0"
+    },
+    {
+      "test": "AI Text Processing",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:41.208Z",
+      "details": "Processed text with category: reflection"
+    },
+    {
+      "test": "Invalid JSON Handling",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:41.313Z",
+      "details": "Correctly rejected invalid JSON"
+    },
+    {
+      "test": "Missing Fields Handling",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:41.315Z",
+      "details": "Correctly rejected incomplete data"
+    },
+    {
+      "test": "404 Handling",
+      "status": "PASS",
+      "timestamp": "2025-07-29T19:19:41.316Z",
+      "details": "Correctly returned 404 for missing endpoint"
+    },
+    {
+      "test": "Rate Limiting",
+      "status": "WARN",
+      "timestamp": "2025-07-29T19:19:41.430Z",
+      "details": "No rate limiting detected (may be intentional)"
+    }
+  ]
+}

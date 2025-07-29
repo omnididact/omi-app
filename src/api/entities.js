@@ -1,11 +1,5 @@
-import { base44 } from './base44Client';
+import { Thought as ThoughtModel, Goal as GoalModel, User as UserModel } from './newEntities.js';
 
-
-export const Thought = base44.entities.Thought;
-
-export const Goal = base44.entities.Goal;
-
-
-
-// auth sdk:
-export const User = base44.auth;
+export const Thought = ThoughtModel;
+export const Goal = GoalModel;
+export const User = UserModel;

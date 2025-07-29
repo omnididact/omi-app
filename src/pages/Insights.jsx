@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from "react";
 import { Thought } from "@/api/entities";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
 import { BarChart3, TrendingUp, Brain, Calendar, Smile, Frown, RefreshCw } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { format, subDays, startOfDay } from "date-fns";

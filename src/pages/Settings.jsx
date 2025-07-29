@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { Thought } from "@/api/entities";
 import { User } from "@/api/entities";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
 import { Settings, Trash2, Download, User as UserIcon, Database, AlertTriangle, CheckCircle, LogOut, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import {
@@ -16,7 +16,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "../components/ui/alert-dialog";
 import PageTransition from "../components/PageTransition";
 import LoadingSpinner from "../components/LoadingSpinner";
 

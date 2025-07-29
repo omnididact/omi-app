@@ -3,13 +3,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { Thought } from "@/api/entities";
 import { Goal } from "@/api/entities"; // Added Goal import
 import { InvokeLLM } from "@/api/integrations";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
+import { Textarea } from "../components/ui/textarea";
 import { Mic, MicOff, Loader2, Type, Send, Brain, Archive, CheckSquare, ArrowLeft, ArrowRight, X, Square } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import PageTransition from "../components/PageTransition";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { AudioRecorder } from "@/utils/audioRecorder";
 
 // Enhanced Badge Component
 const Badge = ({ children, className }) => (
@@ -178,7 +179,7 @@ export default function Record() {
   const [activeGoals, setActiveGoals] = useState([]); // Added activeGoals state
 
   const timerRef = useRef(null);
-  const recognitionRef = useRef(null);
+  const audioRecorderRef = useRef(new AudioRecorder());
   const triageRef = useRef(null);
   const textareaRef = useRef(null);
   
@@ -239,8 +240,8 @@ export default function Record() {
   };
 
   const abortRecording = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.abort();
+    if (audioRecorderRef.current) {
+      audioRecorderRef.current.cancelRecording();
     }
     clearInterval(timerRef.current);
     setIsRecording(false);
@@ -252,94 +253,59 @@ export default function Record() {
   const startVoiceRecording = async () => {
     try {
       setTextInput("");
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = true;
-        recognitionRef.current.interimResults = true;
-        recognitionRef.current.lang = 'en-US';
-
-        recognitionRef.current.onresult = (event) => {
-          const fullTranscript = Array.from(event.results)
-            .map(result => result[0].transcript)
-            .join('');
-          setTextInput(fullTranscript);
-        };
-
-        recognitionRef.current.onerror = (event) => {
-          console.log("Speech Recognition Event:", event.error);
-          
-          // The 'aborted' error is normal when user stops recording manually
-          // Don't treat it as an error - just let onend handle the cleanup
-          if (event.error === 'aborted') {
-            console.log('Speech recognition was stopped by user (normal operation)');
-            return;
-          }
-          
-          // For all other errors, reset the recording state and show appropriate feedback
-          setIsRecording(false);
-          clearInterval(timerRef.current);
-          setRecordingTime(0);
-          
-          // Provide specific feedback for different errors
-          if (event.error === 'not-allowed' || event.error === 'permission-denied') {
-            addNotification("Microphone access denied. Please enable it in your browser settings.", "error");
-            setInputMethod("text");
-          } else if (event.error === 'no-speech') {
-            addNotification("No speech detected. Please try again.", "error");
-          } else if (event.error === 'network') {
-            addNotification("Network error. Please check your connection and try again.", "error");
-          } else if (event.error === 'audio-capture') {
-            addNotification("Failed to capture audio. Another app might be using your microphone.", "error");
-          } else {
-            addNotification(`Speech recognition error: ${event.error}. Please try again.`, "error");
-          }
-        };
-
-        recognitionRef.current.onend = () => {
-          // This event fires after recognition ends, including after manual stop or error
-          // Only process text if we were actively recording and have content
-          if (isRecording && textInput.trim() && !isProcessing) {
-            processText(textInput);
-          }
-          
-          // Always clean up the recording state
-          setIsRecording(false);
-          clearInterval(timerRef.current);
-          setRecordingTime(0);
-        };
-
-        recognitionRef.current.start();
-        setIsRecording(true);
-        setRecordingTime(0);
-        
-        timerRef.current = setInterval(() => {
-          setRecordingTime(prev => prev + 1);
-        }, 1000);
-        
-      } else {
-        addNotification("Speech Recognition not supported in this browser. Use text input.", "error");
-        setInputMethod("text");
-      }
+      
+      // Start recording with the AudioRecorder
+      await audioRecorderRef.current.startRecording();
+      
+      setIsRecording(true);
+      setRecordingTime(0);
+      
+      // Start the timer
+      timerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+      
     } catch (error) {
       console.error("Error starting recording:", error);
       setIsRecording(false);
-      addNotification("Error starting voice recording. Try text input.", "error");
+      
+      // Provide specific error messages
+      if (error.name === 'NotAllowedError') {
+        addNotification("Microphone access denied. Please enable it in your browser settings.", "error");
+        setInputMethod("text");
+      } else if (error.name === 'NotFoundError') {
+        addNotification("No microphone found. Please connect a microphone and try again.", "error");
+        setInputMethod("text");
+      } else {
+        addNotification("Error starting voice recording. Try text input.", "error");
+      }
     }
   };
 
   const stopVoiceRecording = async () => {
-    if (recognitionRef.current) {
-      // This will trigger the 'aborted' error event, which is normal
-      recognitionRef.current.stop();
+    if (!audioRecorderRef.current.isRecording()) {
+      return;
     }
+    
     clearInterval(timerRef.current);
+    setIsRecording(false);
+    setIsProcessing(true);
     
-    // Don't set isRecording to false here - let onend handle it
-    // This prevents race conditions between stop() and the onend event
-    
-    if (textInput.trim()) {
-      await processText(textInput);
+    try {
+      // Stop recording and get transcription
+      const transcription = await audioRecorderRef.current.stopRecording();
+      
+      if (transcription && transcription.trim()) {
+        setTextInput(transcription);
+        await processText(transcription);
+      } else {
+        addNotification("No speech detected. Please try again.", "error");
+        setIsProcessing(false);
+      }
+    } catch (error) {
+      console.error("Error stopping recording:", error);
+      addNotification("Error processing recording. Please try again.", "error");
+      setIsProcessing(false);
     }
   };
 
@@ -639,22 +605,79 @@ export default function Record() {
                       ) : isRecording ? (
                         <motion.div
                           key="recording"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.3 }}
+                          initial={{ scale: 1, rotate: 0 }}
+                          animate={{ 
+                            scale: [1, 0.8, 1],
+                            rotate: [0, 45, 0]
+                          }}
+                          exit={{ 
+                            scale: [1, 0.8, 1],
+                            rotate: [0, -45, 0]
+                          }}
+                          transition={{ 
+                            duration: 0.6,
+                            ease: [0.4, 0, 0.2, 1],
+                            times: [0, 0.5, 1]
+                          }}
                         >
-                          <Square className="w-20 h-20 sm:w-22 sm:h-22 md:w-24 md:h-24 text-white" />
+                          <motion.div
+                            animate={{
+                              scale: [1, 1.1, 1],
+                              rotate: [0, 360]
+                            }}
+                            transition={{
+                              scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+                              rotate: { duration: 8, repeat: Infinity, ease: "linear" }
+                            }}
+                          >
+                            <Square 
+                              className="w-20 h-20 sm:w-22 sm:h-22 md:w-24 md:h-24 text-white" 
+                              style={{
+                                filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.3))'
+                              }}
+                            />
+                          </motion.div>
                         </motion.div>
                       ) : (
                         <motion.div
                           key="ready"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.3 }}
+                          initial={{ scale: 1, rotate: 0 }}
+                          animate={{ 
+                            scale: [1, 0.95, 1],
+                            rotate: [0, -5, 5, 0]
+                          }}
+                          exit={{ 
+                            scale: [1, 0.8, 1],
+                            rotate: [0, 45, 0]
+                          }}
+                          transition={{ 
+                            duration: 0.6,
+                            ease: [0.4, 0, 0.2, 1],
+                            times: [0, 0.5, 1]
+                          }}
+                          whileHover={{
+                            scale: 1.05,
+                            rotate: [0, -2, 2, 0],
+                            transition: { duration: 0.3, repeat: Infinity, repeatType: "reverse" }
+                          }}
                         >
-                          <Mic className="w-20 h-20 sm:w-22 sm:h-22 md:w-24 md:h-24 text-white" />
+                          <motion.div
+                            animate={{
+                              scale: [1, 1.02, 1]
+                            }}
+                            transition={{
+                              duration: 3,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          >
+                            <Mic 
+                              className="w-20 h-20 sm:w-22 sm:h-22 md:w-24 md:h-24 text-white" 
+                              style={{
+                                filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.2))'
+                              }}
+                            />
+                          </motion.div>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -794,7 +817,7 @@ export default function Record() {
                           }, 300);
                         }
                       }}
-                      className="min-h-32 bg-gray-50 border-gray-200 resize-none text-gray-900 transition-all duration-300 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      className="min-h-32 bg-gray-50 border-gray-200 resize-none text-gray-900 transition-all duration-300 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 input-mobile touch-manipulation"
                     />
                   </motion.div>
                   <motion.div

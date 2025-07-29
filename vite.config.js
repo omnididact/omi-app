@@ -6,7 +6,14 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   server: {
-    allowedHosts: true
+    allowedHosts: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   resolve: {
     alias: {
@@ -21,4 +28,28 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    // Performance optimizations
+    target: 'es2015',
+    minify: 'esbuild',
+    cssCodeSplit: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        // Code splitting for better loading performance
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['framer-motion', 'lucide-react'],
+          api: ['axios']
+        }
+      }
+    },
+    // Optimize asset handling
+    assetsInlineLimit: 4096,
+    chunkSizeWarningLimit: 1000
+  },
+  // PWA optimization
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+  }
 }) 

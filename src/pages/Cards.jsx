@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from "react";
 import { Thought } from "@/api/entities";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
 import { ArrowLeft, ArrowRight, Brain, Archive, CheckSquare, ChevronDown, ChevronUp, Lightbulb, Target, Clock, Zap, RotateCcw, Shuffle, Sparkles, Loader2, Plus, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { InvokeLLM } from "@/api/integrations";

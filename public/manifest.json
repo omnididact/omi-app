@@ -1,0 +1,53 @@
+{
+  "name": "OMI - Thought Recorder",
+  "short_name": "OMI",
+  "description": "AI-powered thought recording and organization app",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "utilities", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Record Thought",
+      "short_name": "Record",
+      "description": "Quick voice recording",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "View Thoughts",
+      "short_name": "Thoughts",
+      "description": "Browse saved thoughts",
+      "url": "/Memory",
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}

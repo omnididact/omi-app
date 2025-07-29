@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from "react";
 import { Thought } from "@/api/entities";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import { Search, Calendar, Hash, MoreVertical, Trash2, Edit3, Filter, SortAsc, Smile, Frown, Meh, Archive, RefreshCcw, CheckSquare, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, isToday, isYesterday, isThisWeek, isThisMonth } from "date-fns";
@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuLabel
-} from "@/components/ui/dropdown-menu";
+} from "../components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +25,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "../components/ui/alert-dialog";
 import PageTransition from "../components/PageTransition";
 import LoadingSpinner from "../components/LoadingSpinner";
 

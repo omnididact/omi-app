@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { Thought } from "@/api/entities";
 import { InvokeLLM } from "@/api/integrations";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import { CheckSquare, Square, Clock, Flag, Trash2, MoreVertical, Edit3, Play, RotateCcw, Filter, SortAsc, Sparkles, Loader2, ChevronDown, ChevronUp, Pause, Check, Plus, ExternalLink, Search, Wrench } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuLabel
-} from "@/components/ui/dropdown-menu";
+} from "../components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +26,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "../components/ui/alert-dialog";
 import PageTransition from "../components/PageTransition";
 import LoadingSpinner from "../components/LoadingSpinner";
 
