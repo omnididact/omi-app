@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Settings, Trash2, Download, User as UserIcon, Database, AlertTriangle, CheckCircle, LogOut, BarChart3 } from "lucide-react";
+import InstallButton from "../components/InstallButton";
 import { motion } from "framer-motion";
 import {
   AlertDialog,
@@ -269,6 +270,27 @@ export default function SettingsPage() {
                     <Trash2 className="w-4 h-4" />
                     Delete All
                   </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* App Installation */}
+          <Card className="bg-white/80 backdrop-blur-sm border-white/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Install App
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div>
+                    <p className="font-medium text-blue-800">Install OMI as App</p>
+                    <p className="text-sm text-blue-600">Get the best experience with offline access and home screen launch</p>
+                  </div>
+                  <InstallButton variant="default" size="sm" />
                 </div>
               </div>
             </CardContent>
