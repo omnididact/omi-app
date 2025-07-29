@@ -18,7 +18,7 @@ import {
   SkipForward,
   HelpCircle
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { useTutorial } from '@/hooks/useTutorial';
 
 const Tutorial = ({ onComplete, forceShow = false }) => {

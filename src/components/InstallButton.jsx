@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone } from 'lucide-react';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 const InstallButton = ({ variant = "outline", size = "sm", className = "" }) => {
   const { isInstallable, isInstalled, platform, install, showIOSInstructions } = usePWAInstall();
