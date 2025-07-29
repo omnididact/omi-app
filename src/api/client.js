@@ -1,4 +1,8 @@
-const API_BASE_URL = '/api';
+// API Configuration - Change this to your deployed backend URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
+// For production, you can set VITE_API_URL in your environment
+// Example: VITE_API_URL=https://your-backend.railway.app/api
 
 class APIError extends Error {
   constructor(message, status, response) {
@@ -37,6 +41,7 @@ class APIClient {
     }
 
     try {
+      console.log(`Making request to: ${url}`);
       const response = await fetch(url, config);
       
       // Handle 204 No Content responses (like DELETE operations)
@@ -52,6 +57,7 @@ class APIClient {
 
       return data;
     } catch (error) {
+      console.error('API request failed:', error);
       if (error instanceof APIError) {
         throw error;
       }

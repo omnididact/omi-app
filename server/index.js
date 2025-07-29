@@ -16,8 +16,20 @@ const PORT = process.env.PORT || 3001;
 // Initialize database
 initDatabase();
 
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'https://omi.symmetrycinema.com',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -54,4 +66,5 @@ app.use('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 OMI API server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🌐 CORS enabled for: ${corsOptions.origin.join(', ')}`);
 });
