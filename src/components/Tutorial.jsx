@@ -21,21 +21,21 @@ import {
 import { toast } from '@/components/ui/use-toast';
 import { useTutorial } from '@/hooks/useTutorial';
 
-const Tutorial = ({ onComplete, forceShow = false }) => {
+const Tutorial = ({ onComplete, forceShow = false, isAuthenticated = false, user = null }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const { hasSeenTutorial, shouldShowTutorial, markTutorialComplete } = useTutorial();
+  const { hasSeenTutorial, isFirstLogin, shouldShowTutorial, markTutorialComplete } = useTutorial(isAuthenticated, user);
 
   useEffect(() => {
-    // Show tutorial if forced, or if it's the first visit and hasn't been seen
-    if (forceShow || shouldShowTutorial()) {
+    // Show tutorial if forced, or if it's the first login and hasn't been seen
+    if (forceShow || (shouldShowTutorial && isAuthenticated && user)) {
       // Show tutorial after a short delay to let the app load
       const timer = setTimeout(() => {
         setIsVisible(true);
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [forceShow, shouldShowTutorial]);
+  }, [forceShow, shouldShowTutorial, isAuthenticated, user]);
 
   const tutorialSteps = [
     {

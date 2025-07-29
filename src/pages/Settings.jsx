@@ -35,6 +35,7 @@ export default function SettingsPage() {
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     loadUserAndStats();
@@ -45,6 +46,7 @@ export default function SettingsPage() {
     try {
       const currentUser = await User.me();
       setUser(currentUser);
+      setIsAuthenticated(true);
 
       // Load stats
       const allThoughts = await Thought.list();
@@ -131,7 +133,6 @@ export default function SettingsPage() {
   };
 
   const handleReplayTutorial = () => {
-    localStorage.removeItem('omi-tutorial-completed');
     setShowTutorial(true);
   };
 
@@ -355,6 +356,8 @@ export default function SettingsPage() {
           <Tutorial 
             onComplete={() => setShowTutorial(false)}
             forceShow={true}
+            isAuthenticated={isAuthenticated}
+            user={user}
           />
         )}
 

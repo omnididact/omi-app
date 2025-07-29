@@ -3,6 +3,7 @@ import { User } from '@/api/entities';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorBoundary from './ErrorBoundary';
 import LoginForm from './LoginForm';
+import Tutorial from './Tutorial';
 
 export default function AuthWrapper({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -52,6 +53,10 @@ export default function AuthWrapper({ children }) {
   return (
     <ErrorBoundary>
       {children}
+      <Tutorial 
+        isAuthenticated={isAuthenticated}
+        user={user}
+      />
     </ErrorBoundary>
   );
 }

@@ -1,41 +1,57 @@
 import { useState, useEffect } from 'react';
 
-export const useTutorial = () => {
+export const useTutorial = (isAuthenticated = false, user = null) => {
   const [hasSeenTutorial, setHasSeenTutorial] = useState(false);
-  const [isFirstVisit, setIsFirstVisit] = useState(false);
+  const [isFirstLogin, setIsFirstLogin] = useState(false);
+  const [shouldShowTutorial, setShouldShowTutorial] = useState(false);
 
   useEffect(() => {
+    if (!isAuthenticated || !user) {
+      return;
+    }
+
     // Check if user has seen tutorial before
-    const tutorialSeen = localStorage.getItem('omi-tutorial-completed');
-    const firstVisit = localStorage.getItem('omi-first-visit');
+    const tutorialSeen = localStorage.getItem(`omi-tutorial-completed-${user.id}`);
+    const firstLogin = localStorage.getItem(`omi-first-login-${user.id}`);
     
     setHasSeenTutorial(!!tutorialSeen);
     
-    if (!firstVisit) {
-      setIsFirstVisit(true);
-      localStorage.setItem('omi-first-visit', 'true');
+    if (!firstLogin) {
+      setIsFirstLogin(true);
+      setShouldShowTutorial(true);
+      localStorage.setItem(`omi-first-login-${user.id}`, 'true');
+    } else {
+      setIsFirstLogin(false);
+      setShouldShowTutorial(false);
     }
-  }, []);
+  }, [isAuthenticated, user]);
 
   const markTutorialComplete = () => {
-    localStorage.setItem('omi-tutorial-completed', 'true');
-    setHasSeenTutorial(true);
+    if (user) {
+      localStorage.setItem(`omi-tutorial-completed-${user.id}`, 'true');
+      setHasSeenTutorial(true);
+      setShouldShowTutorial(false);
+    }
   };
 
   const resetTutorial = () => {
-    localStorage.removeItem('omi-tutorial-completed');
-    setHasSeenTutorial(false);
+    if (user) {
+      localStorage.removeItem(`omi-tutorial-completed-${user.id}`);
+      setHasSeenTutorial(false);
+      setShouldShowTutorial(true);
+    }
   };
 
-  const shouldShowTutorial = () => {
-    return !hasSeenTutorial && isFirstVisit;
+  const forceShowTutorial = () => {
+    setShouldShowTutorial(true);
   };
 
   return {
     hasSeenTutorial,
-    isFirstVisit,
+    isFirstLogin,
+    shouldShowTutorial,
     markTutorialComplete,
     resetTutorial,
-    shouldShowTutorial
+    forceShowTutorial
   };
 }; 
