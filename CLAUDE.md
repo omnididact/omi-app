@@ -4,6 +4,7 @@
 
 This is a modern React application built with:
 - **Frontend Framework**: React 18 with JavaScript
+- **Backend Framework**: Node.js with Express
 - **Build Tool**: Vite
 - **UI Components**: Radix UI primitives with shadcn/ui pattern
 - **Styling**: Tailwind CSS with custom theming
@@ -12,13 +13,16 @@ This is a modern React application built with:
 - **Animation**: Framer Motion
 - **State Management**: React hooks and context
 - **API Client**: Base44 SDK integration
+- **Database**: SQLite with sqlite3 package
+- **Deployment**: Railway (backend), Netlify (frontend)
 
 The app appears to be a personal productivity application with features for memory tracking, goals, insights, and task management.
 
 ## AI Development Team Configuration
 *Configured by team-configurator on 2025-07-29*
+*Updated for deployment issues on 2025-07-29*
 
-Your project uses: React 18, Vite, Tailwind CSS, Radix UI
+Your project uses: React 18, Node.js/Express, Vite, Tailwind CSS, Radix UI, SQLite
 
 ### Specialist Assignments
 
@@ -40,11 +44,23 @@ Your project uses: React 18, Vite, Tailwind CSS, Radix UI
   - Form state with React Hook Form
   - Client-side caching strategies
 
+- **Backend Development** → @backend-developer
+  - Node.js/Express server implementation
+  - Database integration and optimization
+  - Authentication and security
+  - API endpoint design and validation
+
 - **API Integration** → @api-architect
   - RESTful API integration patterns
   - Base44 SDK implementation
   - Error handling and loading states
   - Data fetching best practices
+
+- **Deployment & DevOps** → @backend-developer
+  - Railway deployment configuration
+  - Environment variable management
+  - Build optimization and troubleshooting
+  - Production deployment best practices
 
 - **General Frontend** → @frontend-developer
   - JavaScript/TypeScript best practices
@@ -77,10 +93,17 @@ Simply describe what you need, and the right specialist will help:
 - "Cache API responses for offline support"
 - "Add form validation for settings page"
 
-**API Work:**
-- "Integrate new endpoints for memory features"
-- "Handle real-time updates from the server"
-- "Implement pagination for the cards view"
+**Backend & API:**
+- "Fix the Railway deployment issue"
+- "Optimize database queries for better performance"
+- "Add new API endpoints for user management"
+- "Implement proper error handling in the backend"
+
+**Deployment:**
+- "Troubleshoot Railway build failures"
+- "Configure environment variables for production"
+- "Optimize the deployment configuration"
+- "Set up proper CORS and security headers"
 
 **Code Review:**
 - "Review my recent changes for best practices"
@@ -98,7 +121,8 @@ Simply describe what you need, and the right specialist will help:
 3. **Optimizing Performance:**
    "Analyze and optimize the bundle size for faster loading"
 
-4. **Adding Functionality:**
-   "Implement search and filter for the Memory page items"
+4. **Deployment Issues:**
+   "Fix the Railway deployment that keeps failing with npm ci errors"
 
-Your specialized AI team is ready to help build an amazing React application!
+5. **Backend Development:**
+   "Add user authentication endpoints to the Express server"
