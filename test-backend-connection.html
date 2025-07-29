@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Backend Connection Test</h1>
+    
+    <div class="info">
+        <strong>Instructions:</strong>
+        <ol>
+            <li>Replace YOUR_RAILWAY_URL below with your actual Railway URL</li>
+            <li>Click "Test Connection" to verify the backend is working</li>
+            <li>If successful, use this URL in your Netlify VITE_API_URL</li>
+        </ol>
+    </div>
+
+    <div>
+        <label for="backendUrl">Backend URL:</label>
+        <input type="text" id="backendUrl" placeholder="https://your-app.railway.app/api" style="width: 400px; padding: 8px;">
+        <button onclick="testConnection()">Test Connection</button>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        async function testConnection() {
+            const url = document.getElementById('backendUrl').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!url) {
+                resultDiv.innerHTML = '<div class="error">Please enter a backend URL</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="info">Testing connection...</div>';
+
+            try {
+                const response = await fetch(`${url}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>✅ Connection Successful!</strong><br>
+                            Status: ${data.status}<br>
+                            Message: ${data.message}<br>
+                            <br>
+                            <strong>Use this URL in Netlify:</strong><br>
+                            <code>${url}</code>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>❌ Connection Failed</strong><br>
+                            Status: ${response.status}<br>
+                            Response: ${JSON.stringify(data)}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Connection Error</strong><br>
+                        Error: ${error.message}<br>
+                        <br>
+                        <strong>Possible issues:</strong>
+                        <ul>
+                            <li>Check if the Railway URL is correct</li>
+                            <li>Make sure the backend is deployed and running</li>
+                            <li>Verify the URL ends with /api</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 

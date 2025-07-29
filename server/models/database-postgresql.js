@@ -148,14 +148,7 @@ export const initDatabase = async () => {
 // Helper functions that work with both databases
 export const runQuery = async (sql, params = []) => {
   if (isProduction && pool) {
-    // Convert SQLite ? placeholders to PostgreSQL $1, $2, etc.
-    let pgSql = sql;
-    let paramIndex = 1;
-    while (pgSql.includes('?')) {
-      pgSql = pgSql.replace('?', '$' + paramIndex);
-      paramIndex++;
-    }
-    const result = await pool.query(pgSql, params);
+    const result = await pool.query(sql, params);
     return result.rows;
   } else {
     return new Promise((resolve, reject) => {
@@ -169,14 +162,7 @@ export const runQuery = async (sql, params = []) => {
 
 export const runQuerySingle = async (sql, params = []) => {
   if (isProduction && pool) {
-    // Convert SQLite ? placeholders to PostgreSQL $1, $2, etc.
-    let pgSql = sql;
-    let paramIndex = 1;
-    while (pgSql.includes('?')) {
-      pgSql = pgSql.replace('?', '$' + paramIndex);
-      paramIndex++;
-    }
-    const result = await pool.query(pgSql, params);
+    const result = await pool.query(sql, params);
     return result.rows[0];
   } else {
     return new Promise((resolve, reject) => {
@@ -190,14 +176,7 @@ export const runQuerySingle = async (sql, params = []) => {
 
 export const runQueryExec = async (sql, params = []) => {
   if (isProduction && pool) {
-    // Convert SQLite ? placeholders to PostgreSQL $1, $2, etc.
-    let pgSql = sql;
-    let paramIndex = 1;
-    while (pgSql.includes('?')) {
-      pgSql = pgSql.replace('?', '$' + paramIndex);
-      paramIndex++;
-    }
-    const result = await pool.query(pgSql + ' RETURNING id', params);
+    const result = await pool.query(sql + ' RETURNING id', params);
     return { 
       id: result.rows[0]?.id, 
       changes: result.rowCount 

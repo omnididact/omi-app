@@ -1,11 +1,15 @@
 [phases.setup]
-nixPkgs = ["nodejs_20"]
+nixPkgs = ["nodejs_20", "python3"]
 
 [phases.install]
-cmds = ["npm install"]
+cmds = ["npm ci --production"]
 
 [phases.build]
-cmds = ["echo 'Build completed'"]
+cmds = [
+  "echo 'Build completed'",
+  "echo 'Node version:' && node --version",
+  "echo 'NPM version:' && npm --version"
+]
 
 [start]
-cmd = "npm start" 
+cmd = "node index.js" 

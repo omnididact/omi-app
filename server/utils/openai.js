@@ -67,7 +67,10 @@ export const transcribeAudio = async (audioBuffer) => {
     return transcription.text;
   } catch (error) {
     console.error('Whisper API error:', error);
-    throw new Error('Failed to transcribe audio');
+    if (error.status === 404) {
+      throw new Error('Whisper model not available. Please check your OpenAI API access.');
+    }
+    throw new Error('Failed to transcribe audio: ' + error.message);
   }
 };
 
@@ -84,6 +87,9 @@ export const generateImage = async (prompt, options = {}) => {
     return response.data[0].url;
   } catch (error) {
     console.error('DALL-E API error:', error);
-    throw new Error('Failed to generate image');
+    if (error.status === 404) {
+      throw new Error('DALL-E model not available. Please check your OpenAI API access.');
+    }
+    throw new Error('Failed to generate image: ' + error.message);
   }
 };
