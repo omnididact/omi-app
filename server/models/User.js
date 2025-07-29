@@ -1,38 +1,35 @@
-import db from './database.js';
+import { runQuery, runQuerySingle, runQueryExec } from './database.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key';
 
 export class User {
-  static create({ email, name, password }) {
+  static async create({ email, name, password }) {
     const passwordHash = bcrypt.hashSync(password, 10);
     
-    const stmt = db.prepare(`
+    const result = await runQueryExec(`
       INSERT INTO users (email, name, password_hash)
       VALUES (?, ?, ?)
-    `);
+    `, [email, name, passwordHash]);
     
-    const result = stmt.run(email, name, passwordHash);
-    return this.findById(result.lastInsertRowid);
+    return this.findById(result.id);
   }
 
-  static findById(id) {
-    const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
-    const user = stmt.get(id);
+  static async findById(id) {
+    const user = await runQuerySingle('SELECT * FROM users WHERE id = ?', [id]);
     if (user) {
       delete user.password_hash;
     }
     return user;
   }
 
-  static findByEmail(email) {
-    const stmt = db.prepare('SELECT * FROM users WHERE email = ?');
-    return stmt.get(email);
+  static async findByEmail(email) {
+    return await runQuerySingle('SELECT * FROM users WHERE email = ?', [email]);
   }
 
-  static authenticate(email, password) {
-    const user = this.findByEmail(email);
+  static async authenticate(email, password) {
+    const user = await this.findByEmail(email);
     if (!user || !bcrypt.compareSync(password, user.password_hash)) {
       return null;
     }
@@ -57,7 +54,7 @@ export class User {
     }
   }
 
-  static update(id, data) {
+  static async update(id, data) {
     const fields = [];
     const values = [];
     
@@ -77,11 +74,10 @@ export class User {
     fields.push('updated_at = CURRENT_TIMESTAMP');
     values.push(id);
     
-    const stmt = db.prepare(`
+    await runQueryExec(`
       UPDATE users SET ${fields.join(', ')} WHERE id = ?
-    `);
+    `, values);
     
-    stmt.run(...values);
     return this.findById(id);
   }
 }

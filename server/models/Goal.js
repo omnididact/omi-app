@@ -1,28 +1,25 @@
-import db from './database.js';
+import { runQuery, runQuerySingle, runQueryExec } from './database.js';
 
 export class Goal {
-  static create(userId, data) {
-    const stmt = db.prepare(`
+  static async create(userId, data) {
+    const result = await runQueryExec(`
       INSERT INTO goals (user_id, title, description, status)
       VALUES (?, ?, ?, ?)
-    `);
-    
-    const result = stmt.run(
+    `, [
       userId,
       data.title,
       data.description || null,
       data.status || 'active'
-    );
+    ]);
     
-    return this.findById(result.lastInsertRowid);
+    return this.findById(result.id);
   }
 
-  static findById(id) {
-    const stmt = db.prepare('SELECT * FROM goals WHERE id = ?');
-    return stmt.get(id);
+  static async findById(id) {
+    return await runQuerySingle('SELECT * FROM goals WHERE id = ?', [id]);
   }
 
-  static findByUserId(userId, filters = {}, orderBy = 'created_date DESC') {
+  static async findByUserId(userId, filters = {}, orderBy = 'created_date DESC') {
     let query = 'SELECT * FROM goals WHERE user_id = ?';
     let params = [userId];
     
@@ -33,11 +30,10 @@ export class Goal {
     
     query += ` ORDER BY ${orderBy}`;
     
-    const stmt = db.prepare(query);
-    return stmt.all(...params);
+    return await runQuery(query, params);
   }
 
-  static update(id, data) {
+  static async update(id, data) {
     const fields = [];
     const values = [];
     
@@ -53,25 +49,23 @@ export class Goal {
     fields.push('updated_at = CURRENT_TIMESTAMP');
     values.push(id);
     
-    const stmt = db.prepare(`
+    await runQueryExec(`
       UPDATE goals SET ${fields.join(', ')} WHERE id = ?
-    `);
+    `, values);
     
-    stmt.run(...values);
     return this.findById(id);
   }
 
-  static delete(id) {
-    const stmt = db.prepare('DELETE FROM goals WHERE id = ?');
-    const result = stmt.run(id);
+  static async delete(id) {
+    const result = await runQueryExec('DELETE FROM goals WHERE id = ?', [id]);
     return result.changes > 0;
   }
 
-  static list(userId, orderBy = 'created_date DESC') {
+  static async list(userId, orderBy = 'created_date DESC') {
     return this.findByUserId(userId, {}, orderBy);
   }
 
-  static filter(userId, filters, orderBy = 'created_date DESC') {
+  static async filter(userId, filters, orderBy = 'created_date DESC') {
     return this.findByUserId(userId, filters, orderBy);
   }
 }

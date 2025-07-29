@@ -11,7 +11,7 @@ router.use(authenticateToken);
 router.post('/', async (req, res) => {
   try {
     const goalData = req.body;
-    const goal = Goal.create(req.user.id, goalData);
+    const goal = await Goal.create(req.user.id, goalData);
     res.status(201).json(goal);
   } catch (error) {
     console.error('Create goal error:', error);
@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
     
     if (status) filters.status = status;
     
-    const goals = Goal.filter(req.user.id, filters, orderBy || 'created_date DESC');
+    const goals = await Goal.filter(req.user.id, filters, orderBy || 'created_date DESC');
     res.json(goals);
   } catch (error) {
     console.error('Get goals error:', error);
@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
 // Get a specific goal
 router.get('/:id', async (req, res) => {
   try {
-    const goal = Goal.findById(req.params.id);
+    const goal = await Goal.findById(req.params.id);
     if (!goal) {
       return res.status(404).json({ error: 'Goal not found' });
     }
@@ -53,7 +53,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const goalData = req.body;
-    const goal = Goal.update(req.params.id, goalData);
+    const goal = await Goal.update(req.params.id, goalData);
     if (!goal) {
       return res.status(404).json({ error: 'Goal not found' });
     }
@@ -67,7 +67,7 @@ router.put('/:id', async (req, res) => {
 // Delete a goal
 router.delete('/:id', async (req, res) => {
   try {
-    const deleted = Goal.delete(req.params.id);
+    const deleted = await Goal.delete(req.params.id);
     if (!deleted) {
       return res.status(404).json({ error: 'Goal not found' });
     }

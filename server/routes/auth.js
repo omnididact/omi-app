@@ -14,12 +14,12 @@ router.post('/register', async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = User.findByEmail(email);
+    const existingUser = await User.findByEmail(email);
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    const user = User.create({ email, name, password });
+    const user = await User.create({ email, name, password });
     const token = User.generateToken(user);
 
     res.status(201).json({
@@ -42,7 +42,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = User.authenticate(email, password);
+    const user = await User.authenticate(email, password);
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -63,7 +63,7 @@ router.post('/login', async (req, res) => {
 // Get current user (equivalent to base44's User.me())
 router.get('/me', authenticateToken, async (req, res) => {
   try {
-    const user = User.findById(req.user.id);
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -78,7 +78,7 @@ router.get('/me', authenticateToken, async (req, res) => {
 router.put('/me', authenticateToken, async (req, res) => {
   try {
     const { name, email } = req.body;
-    const updatedUser = User.update(req.user.id, { name, email });
+    const updatedUser = await User.update(req.user.id, { name, email });
     res.json(updatedUser);
   } catch (error) {
     console.error('Update user error:', error);

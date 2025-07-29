@@ -1,15 +1,13 @@
-import db from './database.js';
+import { runQuery, runQuerySingle, runQueryExec } from './database.js';
 
 export class Thought {
-  static create(userId, data) {
-    const stmt = db.prepare(`
+  static async create(userId, data) {
+    const result = await runQueryExec(`
       INSERT INTO thoughts (
         user_id, transcription, processed_text, category, sub_category,
         mood_score, priority, tags, action_steps, status, task_status, requires_triage
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    
-    const result = stmt.run(
+    `, [
       userId,
       data.transcription || null,
       data.processed_text || null,
@@ -22,14 +20,13 @@ export class Thought {
       data.status || 'pending',
       data.task_status || null,
       (data.requires_triage !== undefined ? data.requires_triage : false) ? 1 : 0  // Convert boolean to integer for SQLite
-    );
+    ]);
     
-    return this.findById(result.lastInsertRowid);
+    return this.findById(result.id);
   }
 
-  static findById(id) {
-    const stmt = db.prepare('SELECT * FROM thoughts WHERE id = ?');
-    const thought = stmt.get(id);
+  static async findById(id) {
+    const thought = await runQuerySingle('SELECT * FROM thoughts WHERE id = ?', [id]);
     
     if (thought) {
       thought.tags = JSON.parse(thought.tags || '[]');
@@ -40,7 +37,7 @@ export class Thought {
     return thought;
   }
 
-  static findByUserId(userId, filters = {}, orderBy = 'created_date DESC') {
+  static async findByUserId(userId, filters = {}, orderBy = 'created_date DESC') {
     let query = 'SELECT * FROM thoughts WHERE user_id = ?';
     let params = [userId];
     
@@ -61,8 +58,7 @@ export class Thought {
     
     query += ` ORDER BY ${orderBy}`;
     
-    const stmt = db.prepare(query);
-    const thoughts = stmt.all(...params);
+    const thoughts = await runQuery(query, params);
     
     return thoughts.map(thought => ({
       ...thought,
@@ -72,7 +68,7 @@ export class Thought {
     }));
   }
 
-  static update(id, data) {
+  static async update(id, data) {
     const fields = [];
     const values = [];
     
@@ -105,25 +101,23 @@ export class Thought {
     fields.push('updated_at = CURRENT_TIMESTAMP');
     values.push(id);
     
-    const stmt = db.prepare(`
+    await runQueryExec(`
       UPDATE thoughts SET ${fields.join(', ')} WHERE id = ?
-    `);
+    `, values);
     
-    stmt.run(...values);
     return this.findById(id);
   }
 
-  static delete(id) {
-    const stmt = db.prepare('DELETE FROM thoughts WHERE id = ?');
-    const result = stmt.run(id);
+  static async delete(id) {
+    const result = await runQueryExec('DELETE FROM thoughts WHERE id = ?', [id]);
     return result.changes > 0;
   }
 
-  static list(userId, orderBy = 'created_date DESC') {
+  static async list(userId, orderBy = 'created_date DESC') {
     return this.findByUserId(userId, {}, orderBy);
   }
 
-  static filter(userId, filters, orderBy = 'created_date DESC') {
+  static async filter(userId, filters, orderBy = 'created_date DESC') {
     return this.findByUserId(userId, filters, orderBy);
   }
 }

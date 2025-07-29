@@ -1,6 +1,12 @@
 // API Configuration - Change this to your deployed backend URL
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
+// Debug logging
+console.log('🔧 API Configuration:');
+console.log('  - VITE_API_URL:', import.meta.env.VITE_API_URL);
+console.log('  - API_BASE_URL:', API_BASE_URL);
+console.log('  - Environment:', import.meta.env.MODE);
+
 // For production, you can set VITE_API_URL in your environment
 // Example: VITE_API_URL=https://your-backend.railway.app/api
 
@@ -15,6 +21,7 @@ class APIError extends Error {
 class APIClient {
   constructor() {
     this.token = localStorage.getItem('auth_token');
+    console.log('🔧 APIClient initialized with token:', this.token ? 'Present' : 'None');
   }
 
   setToken(token) {
@@ -24,6 +31,7 @@ class APIClient {
     } else {
       localStorage.removeItem('auth_token');
     }
+    console.log('🔧 Token updated:', token ? 'Present' : 'Removed');
   }
 
   async request(endpoint, options = {}) {
@@ -40,24 +48,43 @@ class APIClient {
       config.headers['Authorization'] = `Bearer ${this.token}`;
     }
 
+    console.log(`🌐 Making request to: ${url}`);
+    console.log(`📋 Request config:`, {
+      method: config.method || 'GET',
+      headers: config.headers,
+      body: config.body ? 'Present' : 'None'
+    });
+
     try {
-      console.log(`Making request to: ${url}`);
       const response = await fetch(url, config);
+      
+      console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+      console.log(`📡 Response headers:`, Object.fromEntries(response.headers.entries()));
       
       // Handle 204 No Content responses (like DELETE operations)
       if (response.status === 204) {
+        console.log('✅ 204 No Content - returning null');
         return null;
       }
       
       const data = await response.json();
+      console.log(`📄 Response data:`, data);
 
       if (!response.ok) {
+        console.error(`❌ Request failed: ${response.status} - ${data.error || 'Unknown error'}`);
         throw new APIError(data.error || 'Request failed', response.status, data);
       }
 
+      console.log('✅ Request successful');
       return data;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error('❌ API request failed:', error);
+      console.error('❌ Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      
       if (error instanceof APIError) {
         throw error;
       }

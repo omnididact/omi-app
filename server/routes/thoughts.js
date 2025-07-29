@@ -19,7 +19,7 @@ router.post('/', async (req, res) => {
       });
     }
     
-    const thought = Thought.create(req.user.id, thoughtData);
+    const thought = await Thought.create(req.user.id, thoughtData);
     res.status(201).json(thought);
   } catch (error) {
     console.error('Create thought error:', error);
@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
     if (category) filters.category = category;
     if (priority) filters.priority = priority;
     
-    const thoughts = Thought.filter(req.user.id, filters, orderBy || 'created_date DESC');
+    const thoughts = await Thought.filter(req.user.id, filters, orderBy || 'created_date DESC');
     res.json(thoughts);
   } catch (error) {
     console.error('Get thoughts error:', error);
@@ -48,7 +48,7 @@ router.get('/', async (req, res) => {
 // Get a specific thought
 router.get('/:id', async (req, res) => {
   try {
-    const thought = Thought.findById(req.params.id);
+    const thought = await Thought.findById(req.params.id);
     if (!thought) {
       return res.status(404).json({ error: 'Thought not found' });
     }
@@ -63,7 +63,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const thoughtData = req.body;
-    const thought = Thought.update(req.params.id, thoughtData);
+    const thought = await Thought.update(req.params.id, thoughtData);
     if (!thought) {
       return res.status(404).json({ error: 'Thought not found' });
     }
@@ -77,7 +77,7 @@ router.put('/:id', async (req, res) => {
 // Delete a thought
 router.delete('/:id', async (req, res) => {
   try {
-    const deleted = Thought.delete(req.params.id);
+    const deleted = await Thought.delete(req.params.id);
     if (!deleted) {
       return res.status(404).json({ error: 'Thought not found' });
     }
