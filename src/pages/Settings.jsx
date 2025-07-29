@@ -5,8 +5,9 @@ import { User } from "@/api/entities";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Settings, Trash2, Download, User as UserIcon, Database, AlertTriangle, CheckCircle, LogOut, BarChart3 } from "lucide-react";
+import { Settings, Trash2, Download, User as UserIcon, Database, AlertTriangle, CheckCircle, LogOut, BarChart3, HelpCircle } from "lucide-react";
 import InstallButton from "../components/InstallButton";
+import Tutorial from "../components/Tutorial";
 import { motion } from "framer-motion";
 import {
   AlertDialog,
@@ -33,6 +34,7 @@ export default function SettingsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     loadUserAndStats();
@@ -126,6 +128,11 @@ export default function SettingsPage() {
     } catch (error) {
       console.error('Logout error:', error);
     }
+  };
+
+  const handleReplayTutorial = () => {
+    localStorage.removeItem('omi-tutorial-completed');
+    setShowTutorial(true);
   };
 
   if (isLoading) {
@@ -296,6 +303,35 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
+          {/* Help & Tutorial */}
+          <Card className="bg-white/80 backdrop-blur-sm border-white/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <HelpCircle className="w-5 h-5" />
+                Help & Tutorial
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div>
+                    <p className="font-medium text-green-800">Replay Tutorial</p>
+                    <p className="text-sm text-green-600">Learn how to use OMI's key features</p>
+                  </div>
+                  <Button
+                    onClick={handleReplayTutorial}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <HelpCircle className="w-4 h-4" />
+                    Replay
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Account Actions */}
           <Card className="bg-white/80 backdrop-blur-sm border-white/30">
             <CardHeader>
@@ -313,6 +349,14 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Tutorial Modal */}
+        {showTutorial && (
+          <Tutorial 
+            onComplete={() => setShowTutorial(false)}
+            forceShow={true}
+          />
+        )}
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
