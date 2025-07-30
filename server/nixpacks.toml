@@ -3,17 +3,23 @@ nixPkgs = ["nodejs_20", "python3"]
 
 [phases.install]
 cmds = [
-  "npm ci --omit=dev --no-audit --prefer-offline",
+  "echo '📦 Installing dependencies for Railway deployment...'",
+  "npm ci --omit=dev --no-audit --prefer-offline --verbose",
+  "echo '📋 Listing installed packages:'",
   "npm list --depth=0"
 ]
 
 [phases.build]
 cmds = [
-  "echo 'Build phase starting...'",
-  "echo 'Node version:' && node --version",
-  "echo 'NPM version:' && npm --version",
-  "echo 'Environment: $NODE_ENV'",
-  "echo 'Build completed successfully'"
+  "echo '🔨 Build phase starting...'",
+  "echo '📍 Node version:' && node --version",
+  "echo '📍 NPM version:' && npm --version",
+  "echo '📍 Environment: $NODE_ENV'",
+  "echo '📍 Current directory:' && pwd",
+  "echo '📍 Directory contents:' && ls -la",
+  "echo '📍 Package.json exists:' && test -f package.json && echo 'YES' || echo 'NO'",
+  "echo '📍 Index.js exists:' && test -f index.js && echo 'YES' || echo 'NO'",
+  "echo '✅ Build completed successfully'"
 ]
 
 [start]
