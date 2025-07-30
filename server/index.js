@@ -46,7 +46,12 @@ app.use('/api/ai', aiRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'OMI API is running' });
+  res.json({ 
+    status: 'OK', 
+    message: 'OMI API is running',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development'
+  });
 });
 
 // Error handling middleware
@@ -62,16 +67,20 @@ app.use('*', (req, res) => {
 
 // Initialize database and start server
 const startServer = async () => {
+  // Start server first, then initialize database
+  const server = app.listen(PORT, () => {
+    console.log(`🚀 OMI API server running on port ${PORT}`);
+    console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`🌐 CORS enabled for: ${corsOptions.origin.join(', ')}`);
+  });
+
+  // Initialize database after server is running
   try {
     await initDatabase();
-    app.listen(PORT, () => {
-      console.log(`🚀 OMI API server running on port ${PORT}`);
-      console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-      console.log(`🌐 CORS enabled for: ${corsOptions.origin.join(', ')}`);
-    });
+    console.log('✅ Database initialized after server start');
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
-    process.exit(1);
+    console.error('⚠️  Database connection failed, but server is still running:', error);
+    // Don't exit - let the server run without database for health checks
   }
 };
 
