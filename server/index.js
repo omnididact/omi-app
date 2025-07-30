@@ -45,13 +45,38 @@ app.use('/api/goals', goalRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'OMI API is running',
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV || 'development'
-  });
+app.get('/api/health', async (req, res) => {
+  try {
+    // Check database connectivity if available
+    let dbStatus = 'not configured';
+    if (process.env.DATABASE_URL) {
+      try {
+        // This import will be available after database.js is loaded
+        const { runQuery } = await import('./models/database.js');
+        await runQuery('SELECT 1');
+        dbStatus = 'connected';
+      } catch (dbErr) {
+        dbStatus = 'connection failed';
+      }
+    }
+    
+    res.json({ 
+      status: 'OK', 
+      message: 'OMI API is running',
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV || 'development',
+      database: dbStatus,
+      port: process.env.PORT || 3001,
+      version: '1.0.0'
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'ERROR',
+      message: 'Health check failed',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Error handling middleware
@@ -68,10 +93,12 @@ app.use('*', (req, res) => {
 // Initialize database and start server
 const startServer = async () => {
   // Start server first, then initialize database
-  const server = app.listen(PORT, () => {
+  // Bind to 0.0.0.0 for Railway deployment compatibility
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 OMI API server running on port ${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`📊 Health check: http://0.0.0.0:${PORT}/api/health`);
     console.log(`🌐 CORS enabled for: ${corsOptions.origin.join(', ')}`);
+    console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 
   // Initialize database after server is running
@@ -84,4 +111,8 @@ const startServer = async () => {
   }
 };
 
-startServer();
+// Start the server and handle any startup errors
+startServer().catch((error) => {
+  console.error('❌ Failed to start server:', error);
+  process.exit(1);
+});

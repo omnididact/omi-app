@@ -2,14 +2,22 @@
 nixPkgs = ["nodejs_20", "python3"]
 
 [phases.install]
-cmds = ["npm ci --production"]
+cmds = [
+  "npm ci --omit=dev --no-audit --prefer-offline",
+  "npm list --depth=0"
+]
 
 [phases.build]
 cmds = [
-  "echo 'Build completed'",
+  "echo 'Build phase starting...'",
   "echo 'Node version:' && node --version",
-  "echo 'NPM version:' && npm --version"
+  "echo 'NPM version:' && npm --version",
+  "echo 'Environment: $NODE_ENV'",
+  "echo 'Build completed successfully'"
 ]
 
 [start]
-cmd = "node index.js" 
+cmd = "node index.js"
+
+[variables]
+NODE_ENV = "production" 

@@ -1,5 +1,5 @@
-import pkg from 'pg';
-const { Pool } = pkg;
+import pg from 'pg';
+const { Pool } = pg;
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import sqlite3 from 'sqlite3';
@@ -19,18 +19,38 @@ if (isProduction && process.env.DATABASE_URL) {
     connectionString: process.env.DATABASE_URL,
     ssl: {
       rejectUnauthorized: false
-    }
+    },
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+  });
+  
+  // Handle pool errors gracefully
+  pool.on('error', (err) => {
+    console.error('PostgreSQL pool error:', err);
   });
 } else {
   // SQLite for local development
   const dbPath = join(__dirname, '../database.sqlite');
-  db = new sqlite3.Database(dbPath);
+  db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+      console.error('SQLite connection error:', err);
+    } else {
+      console.log('✅ Connected to SQLite database');
+    }
+  });
 }
 
 export const initDatabase = async () => {
   if (isProduction && pool) {
     // PostgreSQL schema
     try {
+      // Test connection first
+      const client = await pool.connect();
+      console.log('✅ PostgreSQL connection established');
+      client.release();
+      
+      // Create tables sequentially to avoid conflicts
       await pool.query(`
         CREATE TABLE IF NOT EXISTS users (
           id SERIAL PRIMARY KEY,
@@ -40,7 +60,9 @@ export const initDatabase = async () => {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-
+      `);
+      
+      await pool.query(`
         CREATE TABLE IF NOT EXISTS thoughts (
           id SERIAL PRIMARY KEY,
           user_id INTEGER NOT NULL,
@@ -59,7 +81,9 @@ export const initDatabase = async () => {
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
         );
-
+      `);
+      
+      await pool.query(`
         CREATE TABLE IF NOT EXISTS goals (
           id SERIAL PRIMARY KEY,
           user_id INTEGER NOT NULL,
@@ -70,17 +94,22 @@ export const initDatabase = async () => {
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
         );
-
+      `);
+      
+      // Create indexes
+      await pool.query(`
         CREATE INDEX IF NOT EXISTS idx_thoughts_user_id ON thoughts(user_id);
         CREATE INDEX IF NOT EXISTS idx_thoughts_status ON thoughts(status);
         CREATE INDEX IF NOT EXISTS idx_thoughts_category ON thoughts(category);
         CREATE INDEX IF NOT EXISTS idx_goals_user_id ON goals(user_id);
         CREATE INDEX IF NOT EXISTS idx_goals_status ON goals(status);
       `);
+      
       console.log('✅ PostgreSQL database initialized successfully');
     } catch (err) {
-      console.error('PostgreSQL initialization error:', err);
-      throw err;
+      console.error('❌ PostgreSQL initialization error:', err.message);
+      // Don't throw - let the server continue running for health checks
+      console.warn('⚠️  Server will continue running without database');
     }
   } else {
     // SQLite initialization (existing code)
