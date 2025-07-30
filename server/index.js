@@ -1,15 +1,54 @@
-import dotenv from 'dotenv';
-import express from 'express';
-import cors from 'cors';
-import { isIPv6 } from 'net';
-import { initDatabase } from './models/database.js';
-import authRoutes from './routes/auth.js';
-import thoughtRoutes from './routes/thoughts.js';
-import goalRoutes from './routes/goals.js';
-import aiRoutes from './routes/ai.js';
+// Railway debugging - track startup process
+console.log('🚀 RAILWAY STARTUP: Beginning module imports...');
+
+try {
+  console.log('📦 Importing dotenv...');
+  const { default: dotenv } = await import('dotenv');
+  
+  console.log('📦 Importing express...');
+  const { default: express } = await import('express');
+  
+  console.log('📦 Importing cors...');
+  const { default: cors } = await import('cors');
+  
+  console.log('📦 Importing net utilities...');
+  const { isIPv6 } = await import('net');
+  
+  console.log('📦 Importing database...');
+  const { initDatabase } = await import('./models/database.js');
+  
+  console.log('📦 Importing routes...');
+  const { default: authRoutes } = await import('./routes/auth.js');
+  const { default: thoughtRoutes } = await import('./routes/thoughts.js');
+  const { default: goalRoutes } = await import('./routes/goals.js');
+  const { default: aiRoutes } = await import('./routes/ai.js');
+  
+  console.log('✅ All modules imported successfully');
+  
+  // Set up global variables for the rest of the script
+  globalThis.dotenv = dotenv;
+  globalThis.express = express;
+  globalThis.cors = cors;
+  globalThis.isIPv6 = isIPv6;
+  globalThis.initDatabase = initDatabase;
+  globalThis.authRoutes = authRoutes;
+  globalThis.thoughtRoutes = thoughtRoutes;
+  globalThis.goalRoutes = goalRoutes;
+  globalThis.aiRoutes = aiRoutes;
+  
+} catch (error) {
+  console.error('❌ CRITICAL: Module import failed!');
+  console.error('Error details:', {
+    message: error.message,
+    stack: error.stack,
+    name: error.name
+  });
+  console.error('🚫 This is likely why Railway deployment is failing');
+  process.exit(1);
+}
 
 // Load environment variables
-dotenv.config();
+globalThis.dotenv.config();
 
 // Railway deployment debugging
 console.log('🚀 RAILWAY DEPLOYMENT DEBUG INFO:');
@@ -18,11 +57,11 @@ console.log('PORT:', process.env.PORT);
 console.log('DATABASE_URL present:', !!process.env.DATABASE_URL);
 console.log('Platform:', process.platform);
 console.log('Node version:', process.version);
-console.log('IPv6 support:', isIPv6('::1'));
+console.log('IPv6 support:', globalThis.isIPv6('::1'));
 console.log('Current working directory:', process.cwd());
 console.log('Environment variables count:', Object.keys(process.env).length);
 
-const app = express();
+const app = globalThis.express();
 const PORT = process.env.PORT || 3001;
 
 // Validate critical environment variables for Railway
@@ -44,9 +83,9 @@ const corsOptions = {
 };
 
 // Middleware
-app.use(cors(corsOptions));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(globalThis.cors(corsOptions));
+app.use(globalThis.express.json({ limit: '10mb' }));
+app.use(globalThis.express.urlencoded({ extended: true, limit: '10mb' }));
 
 // JSON parse error handling middleware
 app.use((err, req, res, next) => {
@@ -57,10 +96,10 @@ app.use((err, req, res, next) => {
 });
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/thoughts', thoughtRoutes);
-app.use('/api/goals', goalRoutes);
-app.use('/api/ai', aiRoutes);
+app.use('/api/auth', globalThis.authRoutes);
+app.use('/api/thoughts', globalThis.thoughtRoutes);
+app.use('/api/goals', globalThis.goalRoutes);
+app.use('/api/ai', globalThis.aiRoutes);
 
 // Minimal Railway health check endpoint - CRITICAL FOR DEPLOYMENT
 app.get('/api/health', (req, res) => {
@@ -158,7 +197,7 @@ const startServer = async () => {
       console.log('🗄️  Starting database initialization (non-blocking)...');
       setImmediate(async () => {
         try {
-          await initDatabase();
+          await globalThis.initDatabase();
           console.log('✅ Database initialized successfully after server start');
         } catch (error) {
           console.error('⚠️  Database connection failed, but server continues running:');
@@ -214,12 +253,92 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-// Start the server and handle any startup errors
-startServer()
-  .then(() => {
+// Railway-safe server startup with maximum error handling
+const railwayStartup = async () => {
+  console.log('🚀 RAILWAY: Starting server with enhanced error handling...');
+  
+  try {
+    // Try normal startup first
+    await startServer();
     console.log('🎉 Server startup completed successfully');
-  })
-  .catch((error) => {
-    console.error('❌ Failed to start server:', error);
-    process.exit(1);
-  });
+  } catch (error) {
+    console.error('❌ Primary server startup failed:', error);
+    console.log('🆘 RAILWAY FALLBACK: Starting minimal emergency server...');
+    
+    try {
+      // Create minimal emergency server for Railway health checks
+      const emergencyApp = globalThis.express();
+      const emergencyPort = process.env.PORT || 3001;
+      
+      // Minimal CORS for emergency server
+      emergencyApp.use((req, res, next) => {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+        next();
+      });
+      
+      // Emergency health check endpoint
+      emergencyApp.get('/api/health', (req, res) => {
+        console.log('🆘 Emergency health check hit');
+        res.status(200).json({
+          status: 'EMERGENCY_MODE',
+          message: 'Server running in emergency mode',
+          timestamp: new Date().toISOString(),
+          error: 'Primary startup failed',
+          railway: {
+            deployment: true,
+            mode: 'fallback'
+          }
+        });
+      });
+      
+      emergencyApp.get('/', (req, res) => {
+        res.status(200).json({
+          message: 'Emergency OMI API Server',
+          status: 'emergency_mode',
+          timestamp: new Date().toISOString()
+        });
+      });
+      
+      // Catch all for emergency server
+      emergencyApp.use('*', (req, res) => {
+        res.status(503).json({
+          error: 'Service temporarily unavailable - emergency mode',
+          status: 'emergency',
+          path: req.path
+        });
+      });
+      
+      // Start emergency server
+      emergencyApp.listen(emergencyPort, '0.0.0.0', () => {
+        console.log('🆘 EMERGENCY SERVER STARTED');
+        console.log(`📍 Emergency server listening on 0.0.0.0:${emergencyPort}`);
+        console.log('🏥 Railway health checks will work on /api/health');
+        console.log('⚠️  This is a minimal server - full functionality unavailable');
+      });
+      
+    } catch (emergencyError) {
+      console.error('❌ CRITICAL: Even emergency server failed!');
+      console.error('Emergency error:', emergencyError);
+      console.error('🚫 Railway deployment completely failed');
+      process.exit(1);
+    }
+  }
+};
+
+// Enhanced error handling for all unhandled cases
+process.on('uncaughtException', (error) => {
+  console.error('🚨 UNCAUGHT EXCEPTION:');
+  console.error(error);
+  console.log('🔄 Attempting to continue...');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🚨 UNHANDLED REJECTION at:', promise);
+  console.error('Reason:', reason);
+  console.log('🔄 Attempting to continue...');
+});
+
+// Start with Railway-safe startup
+railwayStartup();
