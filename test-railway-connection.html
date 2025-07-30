@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Backend Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Railway Backend Connection Test</h1>
+        <p>Testing connection to: <strong>https://omi-app-production.up.railway.app</strong></p>
+        
+        <div>
+            <button onclick="testHealth()">Test Health Endpoint</button>
+            <button onclick="testCORS()">Test CORS</button>
+            <button onclick="testAPI()">Test API Endpoints</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://omi-app-production.up.railway.app';
+        const resultsDiv = document.getElementById('results');
+
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            resultsDiv.appendChild(div);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function clearResults() {
+            resultsDiv.innerHTML = '';
+        }
+
+        async function testHealth() {
+            addResult('Testing health endpoint...', 'info');
+            try {
+                const response = await fetch(`${API_BASE}/api/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ Health check passed! Status: ${data.status}`, 'success');
+                    addResult(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+                } else {
+                    addResult(`❌ Health check failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Health check error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCORS() {
+            addResult('Testing CORS configuration...', 'info');
+            try {
+                const response = await fetch(`${API_BASE}/api/health`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'GET',
+                    }
+                });
+                
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                };
+                
+                addResult(`✅ CORS preflight successful`, 'success');
+                addResult(`<pre>${JSON.stringify(corsHeaders, null, 2)}</pre>`, 'info');
+            } catch (error) {
+                addResult(`❌ CORS test error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAPI() {
+            addResult('Testing API endpoints...', 'info');
+            
+            // Test endpoints that don't require authentication
+            const endpoints = [
+                { path: '/', method: 'GET' },
+                { path: '/api/health', method: 'GET' },
+                { path: '/health', method: 'GET' }
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(`${API_BASE}${endpoint.path}`, {
+                        method: endpoint.method
+                    });
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        addResult(`✅ ${endpoint.method} ${endpoint.path} - ${response.status}`, 'success');
+                    } else {
+                        addResult(`⚠️ ${endpoint.method} ${endpoint.path} - ${response.status}: ${data.error || 'Unknown error'}`, 'error');
+                    }
+                } catch (error) {
+                    addResult(`❌ ${endpoint.method} ${endpoint.path} - Error: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Run initial health check
+        window.addEventListener('load', () => {
+            addResult('🚀 Starting Railway backend connection tests...', 'info');
+            testHealth();
+        });
+    </script>
+</body>
+</html>

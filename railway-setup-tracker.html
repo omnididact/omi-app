@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Setup Tracker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .checklist input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .checklist label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .completed {
+            background: #d4edda;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        .env-vars {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: monospace;
+            border: 1px solid #dee2e6;
+        }
+        .env-vars div {
+            margin-bottom: 10px;
+        }
+        .copy-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .copy-btn:hover {
+            background: #0056b3;
+        }
+        .test-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .test-section input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .test-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .test-btn:hover {
+            background: #218838;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Railway Setup Tracker</h1>
+        
+        <h2>📋 Setup Checklist</h2>
+        <ul class="checklist">
+            <li>
+                <input type="checkbox" id="step1">
+                <label for="step1">Open Railway Dashboard at railway.app</label>
+            </li>
+            <li>
+                <input type="checkbox" id="step2">
+                <label for="step2">Add PostgreSQL Database (New → Database → PostgreSQL)</label>
+            </li>
+            <li>
+                <input type="checkbox" id="step3">
+                <label for="step3">Set Environment Variables (see below)</label>
+            </li>
+            <li>
+                <input type="checkbox" id="step4">
+                <label for="step4">Wait for deployment to complete</label>
+            </li>
+            <li>
+                <input type="checkbox" id="step5">
+                <label for="step5">Get your app URL from Settings → Domains</label>
+            </li>
+            <li>
+                <input type="checkbox" id="step6">
+                <label for="step6">Test the health endpoint</label>
+            </li>
+        </ul>
+
+        <h2>🔐 Environment Variables to Add</h2>
+        <div class="env-vars">
+            <div>
+                NODE_ENV=production
+                <button class="copy-btn" onclick="copyToClipboard('NODE_ENV=production')">Copy</button>
+            </div>
+            <div>
+                JWT_SECRET=851441a23de3da4060a5d986f93646289e46a8dd89dd84e89c3506575c3b5120
+                <button class="copy-btn" onclick="copyToClipboard('JWT_SECRET=851441a23de3da4060a5d986f93646289e46a8dd89dd84e89c3506575c3b5120')">Copy</button>
+            </div>
+            <div>
+                OPENAI_API_KEY=your-openai-api-key-here
+                <button class="copy-btn" onclick="copyToClipboard('OPENAI_API_KEY=your-openai-api-key-here')">Copy</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Test Your Deployment</h2>
+            <input type="text" id="appUrl" placeholder="Enter your Railway app URL (e.g., https://your-app.up.railway.app)">
+            <button class="test-btn" onclick="testDeployment()">Test Health Endpoint</button>
+            <div id="testResult"></div>
+        </div>
+
+        <h2>📝 Notes</h2>
+        <ul>
+            <li>Railway will automatically provide DATABASE_URL when you add PostgreSQL</li>
+            <li>Deployment usually takes 2-3 minutes</li>
+            <li>Check deployment logs if anything fails</li>
+            <li>The JWT_SECRET above is randomly generated and secure</li>
+        </ul>
+    </div>
+
+    <script>
+        // Load saved state
+        document.querySelectorAll('.checklist input').forEach(checkbox => {
+            const saved = localStorage.getItem(checkbox.id);
+            if (saved === 'true') {
+                checkbox.checked = true;
+                checkbox.parentElement.classList.add('completed');
+            }
+            
+            checkbox.addEventListener('change', function() {
+                localStorage.setItem(this.id, this.checked);
+                if (this.checked) {
+                    this.parentElement.classList.add('completed');
+                } else {
+                    this.parentElement.classList.remove('completed');
+                }
+            });
+        });
+
+        // Load saved URL
+        const savedUrl = localStorage.getItem('railwayUrl');
+        if (savedUrl) {
+            document.getElementById('appUrl').value = savedUrl;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+        async function testDeployment() {
+            const url = document.getElementById('appUrl').value.trim();
+            const resultDiv = document.getElementById('testResult');
+            
+            if (!url) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Please enter your Railway app URL';
+                return;
+            }
+
+            localStorage.setItem('railwayUrl', url);
+            
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Testing...';
+
+            try {
+                const response = await fetch(url + '/api/health');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = '✅ Success! API is running. Response: ' + JSON.stringify(data);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = '❌ Error: HTTP ' + response.status;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Failed to connect. Make sure the URL is correct and CORS is enabled.';
+            }
+        }
+    </script>
+</body>
+</html>
